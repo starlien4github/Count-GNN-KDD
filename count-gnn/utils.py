@@ -623,7 +623,7 @@ def GetEdgeAdj(indices):
     edge_num=len(edge_index[0])
     #print(edge_index.size())
     edge_adj = torch.zeros([edge_num, edge_num])
-    # 遍历边的起始点
+    
     edge_iv_id = 0
     for i in edge_index[0]:
         v = edge_index[1][edge_iv_id]
