@@ -40,22 +40,22 @@ INF = float("inf")
 
 train_config = {
     "max_npv": 4,  # max_number_pattern_vertices: 8, 16, 32
-    "max_npe": 4,  # max_number_pattern_edges: 8, 16, 32
-    "max_npvl": 4,  # max_number_pattern_vertex_labels: 8, 16, 32
-    "max_npel": 4,  # max_number_pattern_edge_labels: 8, 16, 32
+    "max_npe": 3,  # max_number_pattern_edges: 8, 16, 32
+    "max_npvl": 2,  # max_number_pattern_vertex_labels: 8, 16, 32
+    "max_npel": 2,  # max_number_pattern_edge_labels: 8, 16, 32
 
-    "max_ngv": 64,  # max_number_graph_vertices: 64, 512,4096
-    "max_nge": 256,  # max_number_graph_edges: 256, 2048, 16384
-    "max_ngvl": 8,  # max_number_graph_vertex_labels: 16, 64, 256
-    "max_ngel": 8,  # max_number_graph_edge_labels: 16, 64, 256
+    "max_ngv": 28,  # max_number_graph_vertices: 64, 512,4096
+    "max_nge": 66,  # max_number_graph_edges: 256, 2048, 16384
+    "max_ngvl": 7,  # max_number_graph_vertex_labels: 16, 64, 256
+    "max_ngel": 4,  # max_number_graph_edge_labels: 16, 64, 256
 
     "base": 2,
 
-    "gpu_id": -1,
+    "gpu_id": 0,
     "num_workers": 12,
 
-    "epochs": 200,
-    "batch_size": 512,
+    "epochs": 250,
+    "batch_size": 1024,
     "update_every": 1,  # actual batch_sizer = batch_size * update_every
     "print_every": 100,
     "init_emb": "Equivariant",  # None, Orthogonal, Normal, Equivariant
@@ -64,8 +64,8 @@ train_config = {
     "dropout": 0.2,
     "dropatt": 0.2,
 
-    "reg_loss": "MSE",  # MAE, MSEl
-    "bp_loss": "MSE",  # MAE, MSE
+    "reg_loss": "MAE",  # MAE, MSEl
+    "bp_loss": "MAE",  # MAE, MSE
     "bp_loss_slp": "anneal_cosine$1.0$0.01",  # 0, 0.01, logistic$1.0$0.01, linear$1.0$0.01, cosine$1.0$0.01,
     # cyclical_logistic$1.0$0.01, cyclical_linear$1.0$0.01, cyclical_cosine$1.0$0.01
     # anneal_logistic$1.0$0.01, anneal_linear$1.0$0.01, anneal_cosine$1.0$0.01
@@ -76,7 +76,7 @@ train_config = {
 
     "model": "CNN",  # CNN, RNN, TXL, RGCN, RGIN, RSIN
 
-    "emb_dim": 128,
+    "emb_dim": 4,
     "activation_function": "leaky_relu",  # sigmoid, softmax, tanh, relu, leaky_relu, prelu, gelu
 
     "filter_net": "MaxGatedFilterNet",  # None, MaxGatedFilterNet
@@ -138,7 +138,7 @@ train_config = {
     "ppn_num_bases": 8,
     "ppn_graph_num_layers": 3,
     "ppn_pattern_num_layers": 3,
-    "ppn_hidden_dim": 24,
+    "ppn_hidden_dim": 12,
 
     "edgemean_num_bases": 8,
     "edgemean_graph_num_layers": 3,
