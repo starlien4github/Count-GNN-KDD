@@ -4,7 +4,7 @@ We provide the implementaion of Count-GNN model on Small,Large,MUTAG, OGB datase
 
 The repository is organised as follows:
 - data/: data/ only contains MUTAG data currently, we will upload other datasets later.
-- Count_GNN/: contains our model.
+- count-gnn/: contains our model.
 - converter/: contains code to convert graphs to igraph format
 - generator/: contains code to generate queries and graphs
 
