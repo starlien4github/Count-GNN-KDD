@@ -33,8 +33,8 @@ class EGATS(GraphAdjModel):
 
         # create predict layers
         
-        if self.add_enc:#默认为true
-            #enc_dim是一个与vertex_num,vertex_label_num,edge_label_num相关的值
+        if self.add_enc:
+            
             p_enc_dim, g_enc_dim,p_e_enc_dim,g_e_enc_dim = self.get_enc_dim()
             p_dim += p_enc_dim*2+p_e_enc_dim
             g_dim += g_enc_dim*2+g_e_enc_dim
