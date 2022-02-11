@@ -18,23 +18,23 @@ class PPN(GraphAdjModel):
         #self.ignore_norm = config["rgcn_ignore_norm"]
 
         # create networks
-        #get_emb_dim 返回固定值：128,128(128为config值）
+        
         p_emb_dim, g_emb_dim, p_e_emb_dim, g_e_emb_dim = self.get_emb_dim()
-        #g_net为n层gcn网络，g_dim=hidden_dim
+        
         self.g_net, g_dim = self.create_net(
             name="graph", input_dim=g_emb_dim*3, hidden_dim=config["ppn_hidden_dim"],
             num_layers=config["ppn_graph_num_layers"],  act_func=self.act_func,
             dropout=self.dropout, bsz=config["batch_size"])
-        #p_net，p_dim和g_net,g_dim同理
+        
         self.p_net, p_dim = (self.g_net, g_dim) if self.share_arch else self.create_net(
             name="pattern", input_dim=p_emb_dim*3, hidden_dim=config["ppn_hidden_dim"],
             num_layers=config["ppn_pattern_num_layers"], act_func=self.act_func,
             dropout=self.dropout, bsz=config["batch_size"])
 
         # create predict layers
-        #这两个if语句在embedding网络的基础上增加了pattern和graph输入predict的维度数
-        if self.add_enc:#默认为true
-            #enc_dim是一个与vertex_num,vertex_label_num,edge_label_num相关的值
+        
+        if self.add_enc:
+            
             p_enc_dim, g_enc_dim,p_e_enc_dim,g_e_enc_dim = self.get_enc_dim()
             p_dim += p_enc_dim*2+p_e_enc_dim
             g_dim += g_enc_dim*2+g_e_enc_dim
@@ -83,20 +83,20 @@ class PPN(GraphAdjModel):
     def forward(self, pattern, pattern_len, pattern_e_len, graph, graph_len, graph_e_len, p_e_max, g_e_max,p_index,g_index):
         bsz = pattern_len.size(0)
         zero_mask=None
-        #get_emb中有个重要技巧，在embedding.py中，解决了同一个batch中pattern规模不同的问题
+        
         p_vl_emb, g_vl_emb, p_el_emb,g_el_emb = self.get_emb(pattern, graph)
         pattern_output = self.GraphEmbedding(p_vl_emb,p_el_emb,pattern.adjacency_matrix()._indices())
         pattern_eadj=pattern.edata["eadj"]
         pattern_input=split_batch(p_index,pattern_output,pattern_e_len,p_e_max)
         pattern_eadj=split_batch(p_index,pattern_eadj,pattern_e_len,p_e_max)
         pattern_first=self.p_linear(pattern_input)
-        #将3层RGCN的结果相加得到pattern_output
+        
         for p_rgcn in self.p_net:
             o = p_rgcn(pattern_input, pattern_eadj, p_e_max)
             pattern_output = o + pattern_first
 
         graph_output = self.GraphEmbedding(g_vl_emb,g_el_emb,graph.adjacency_matrix()._indices())
-        #对于graph_output，用filter网络得到的mask将无关节点置0.0
+        
         graph_eadj=graph.edata["eadj"]
         graph_input=split_batch(g_index,graph_output,graph_e_len,g_e_max)
         graph_eadj=split_batch(g_index,graph_eadj,graph_e_len,g_e_max)
@@ -111,11 +111,10 @@ class PPN(GraphAdjModel):
         '''if zero_mask is not None:
             graph_output.masked_fill_(zero_mask, 0.0)'''
         #########################################################################################
-        #add_enc&add_degree默认值为true,这一段可能是个有用的trick，但也许对于我们的模型不需要，先去掉康康效果#
-        #且对于我们的模型，边的起点考虑入度，终点则应该考虑出度
+        
         #########################################################################################
         if self.add_enc and self.add_degree:
-            #pattern_enc和graph_enc实际是将二者再次获得编码，pattern_enc是cat(pattern_node_enc,pattern_node_label_enc,dim=1)(拼接后行数增加）
+            
             pattern_enc, graph_enc,pattern_e_enc,graph_e_enc = self.get_enc(pattern, graph)
             p_enc = self.PredictEnc(pattern_e_enc,pattern_enc,pattern.adjacency_matrix()._indices())
             g_enc = self.PredictEnc(graph_e_enc,graph_enc,graph.adjacency_matrix()._indices())

@@ -431,9 +431,6 @@ class GraphAdjModel(BaseModel):
 
     def get_emb(self, pattern, graph):
         #bsz = pattern_len.size(0)
-
-        #p_v_enc,p_vl_enc通过create_enc调用nn.Embedding()网络,将词转化为词向量
-        #但其实pattern_v,graph_v并没有用到
         pattern_v, pattern_vl = self.p_v_enc(pattern.ndata["id"]), self.p_vl_enc(pattern.ndata["label"])
         pattern_e, pattern_el = self.p_e_enc(pattern.edata["id"]), self.p_el_enc(pattern.edata["label"])
         graph_v, graph_vl = self.g_v_enc(graph.ndata["id"]), self.g_vl_enc(graph.ndata["label"])
@@ -446,7 +443,7 @@ class GraphAdjModel(BaseModel):
             g_e_emb=graph_el
 
         else:
-            #p_vl_emb将词向量通过create_emb做了一个线性映射，有三种不同的方法，区别在于线性映射的参数初始化方式不同
+            
             p_emb = self.p_vl_emb(pattern_vl)
             g_emb = self.g_vl_emb(graph_vl)
             p_e_emb = self.p_el_emb(pattern_el)

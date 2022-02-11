@@ -17,15 +17,15 @@ class RGCN(GraphAdjModel):
         self.ignore_norm = config["rgcn_ignore_norm"]
 
         # create networks
-        #get_emb_dim 返回固定值：128,128(128为config值）
+        
         p_emb_dim, g_emb_dim = self.get_emb_dim()
-        #g_net为n层gcn网络，g_dim=hidden_dim
+        
         self.g_net, g_dim = self.create_net(
             name="graph", input_dim=g_emb_dim, hidden_dim=config["rgcn_hidden_dim"],
             num_layers=config["rgcn_graph_num_layers"], 
             num_rels=self.max_ngel, num_bases=config["rgcn_num_bases"], regularizer=config["rgcn_regularizer"], 
             act_func=self.act_func, dropout=self.dropout)
-        #p_net，p_dim和g_net,g_dim同理
+        
         self.p_net, p_dim = (self.g_net, g_dim) if self.share_arch else self.create_net(
             name="pattern", input_dim=p_emb_dim, hidden_dim=config["rgcn_hidden_dim"],
             num_layers=config["rgcn_pattern_num_layers"], 
@@ -33,9 +33,9 @@ class RGCN(GraphAdjModel):
             act_func=self.act_func, dropout=self.dropout)
         
         # create predict layersr
-        #这两个if语句在embedding网络的基础上增加了pattern和graph输入predict的维度数
-        if self.add_enc:#默认为true
-            #enc_dim是一个与vertex_num,vertex_label_num,edge_label_num相关的值
+        
+        if self.add_enc:
+            
             p_enc_dim, g_enc_dim = self.get_enc_dim()
             p_dim += p_enc_dim
             g_dim += g_enc_dim
@@ -181,28 +181,28 @@ class RGCN(GraphAdjModel):
 
     def forward(self, pattern, pattern_len, graph, graph_len):
         bsz = pattern_len.size(0)
-        #filter_gate选出了graph中与同构无关的节点的mask
+        
         gate = self.get_filter_gate(pattern, pattern_len, graph, graph_len)
         zero_mask = (gate == 0) if gate is not None else None
-        #get_emb中有个重要技巧，在embedding.py中，解决了同一个batch中pattern规模不同的问题
+        
         pattern_emb, graph_emb = self.get_emb(pattern, pattern_len, graph, graph_len)
         if zero_mask is not None:
             graph_emb.masked_fill_(zero_mask, 0.0)
 
         pattern_output = pattern_emb
-        #norm是RGCN的forward中一个edge相关的optional参数，在我们的模型中不需要
+        
         if self.ignore_norm:
             pattern_norm = None
         else:
             if "norm" in pattern.edata:
                 print(pattern.edata["norm"])
-            #实际执行的是以下的内容
+            
             else:
                 pattern.apply_edges(lambda e: {"norm": 1.0/e.dst["indeg"]})
                 pattern.edata["norm"].masked_fill_(torch.isinf(pattern.edata["norm"]), 0.0)
                 pattern.edata["norm"] = pattern.edata["norm"].unsqueeze(-1)
                 pattern_norm = pattern.edata["norm"]
-        #将3层RGCN的结果相加得到pattern_output
+        
         for p_rgcn in self.p_net:
             o = p_rgcn(pattern, pattern_output, pattern.edata["label"], pattern_norm)
             pattern_output = o + pattern_output
@@ -218,19 +218,19 @@ class RGCN(GraphAdjModel):
                 graph.edata["norm"].masked_fill_(torch.isinf(graph.edata["norm"]), 0.0)
                 graph.edata["norm"] = graph.edata["norm"].unsqueeze(-1)
                 graph_norm = graph.edata["norm"]
-        #对于graph_output，用filter网络得到的mask将无关节点置0.0
+        
         for g_rgcn in self.g_net:
             o = g_rgcn(graph, graph_output, graph.edata["label"], graph_norm)
             graph_output = o + graph_output
             if zero_mask is not None:
                 graph_output.masked_fill_(zero_mask, 0.0)
-        #add_enc&add_degree默认值为true
+        
         if self.add_enc and self.add_degree:
-            #pattern_enc和graph_enc实际是将二者再次获得编码，pattern_enc是cat(pattern_node_enc,pattern_node_label_enc,dim=1)(拼接后行数增加）
+            
             pattern_enc, graph_enc = self.get_enc(pattern, pattern_len, graph, graph_len)
             if zero_mask is not None:
                 graph_enc.masked_fill_(zero_mask, 0.0)
-            #indeg为node的入度
+            
             pattern_output = torch.cat([pattern_enc, pattern_output, pattern.ndata["indeg"].unsqueeze(-1)], dim=1)
             graph_output = torch.cat([graph_enc, graph_output, graph.ndata["indeg"].unsqueeze(-1)], dim=1)
         elif self.add_enc:

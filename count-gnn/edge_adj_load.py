@@ -16,19 +16,19 @@ def edge_adj_load(pattern,graph):
         graph_edgeadj[data_type] = list()
     for batch in tqdm.trange(112):
         for j in range(8):
-            loaded_data = numpy.load(os.path.join("./data/debug/edgeadj/train", "%s_edgeadj.npz" % (pattern["train"][batch * 8 + j].id)))  # 读取含有多个数组的文件
+            loaded_data = numpy.load(os.path.join("./data/debug/edgeadj/train", "%s_edgeadj.npz" % (pattern["train"][batch * 8 + j].id)))  
             pattern_edgeadj["train"].append(torch.from_numpy(loaded_data['arr_0']))
             graph_edgeadj["train"].append(torch.from_numpy(loaded_data['arr_1']))
 
     for batch in tqdm.trange(112):
         loaded_data = numpy.load(os.path.join("./data/debug/edgeadj/test",
-                                              "%s_edgeadj.npz" % (pattern["test"][batch].id)))  # 读取含有多个数组的文件
+                                              "%s_edgeadj.npz" % (pattern["test"][batch].id)))  
         pattern_edgeadj["test"].append(torch.from_numpy(loaded_data['arr_0']))
         graph_edgeadj["test"].append(torch.from_numpy(loaded_data['arr_1']))
 
     for batch in tqdm.trange(112):
         loaded_data = numpy.load(os.path.join("./data/debug/edgeadj/dev",
-                                              "%s_edgeadj.npz" % (pattern["dev"][batch].id)))  # 读取含有多个数组的文件
+                                              "%s_edgeadj.npz" % (pattern["dev"][batch].id)))  
         pattern_edgeadj["dev"].append(torch.from_numpy(loaded_data['arr_0']))
         graph_edgeadj["dev"].append(torch.from_numpy(loaded_data['arr_1']))
 
