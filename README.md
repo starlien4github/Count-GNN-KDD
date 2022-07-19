@@ -17,8 +17,11 @@ The repository is organised as follows:
 * pandas
 * scipy
 * tensorboardX
+* sklearn
+* python-igraph
 * torch >= 1.3.0
 * dgl == 0.4.3post2
+
 
 ## Running experiments
 
